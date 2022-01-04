@@ -200,6 +200,7 @@ def main(files: Tuple[Path]):
         all_references += references
 
     graph = graphviz.Digraph()
+    graph.attr("node", shape="box")
     for r in set(all_references):
         r.add_edge_to_graph(graph)
 
