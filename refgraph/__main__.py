@@ -114,6 +114,13 @@ class Reference:
     from_: Optional[str]
     to: str
 
+    def __hash__(self) -> int:
+        return hash(str(self.from_) + "\\" + self.to)
+
+    def add_edge_to_graph(self, graph: graphviz.Digraph) -> None:
+        if self.from_:
+            graph.edge(self.from_.replace(":", "-"), self.to.replace(":", "-"))
+
 
 def get_references(
     nodes: List[LatexNode],
@@ -131,8 +138,7 @@ def get_references(
     Returns:
         The found overarching label for this list of nodes, with the list of references.
     """
-    local_references: List[str] = []
-    all_references: List[Reference] = []
+    references: List[Reference] = []
     last_label: Optional[str] = None
     for node in nodes:
         if isinstance(node, LatexMacroNode):
@@ -140,7 +146,10 @@ def get_references(
                 label = node.nodeargd.argnlist[0].nodelist[0].chars
             elif str(node.macroname).lower() in REFERENCE_MACROS:
                 r = node.nodeargd.argnlist[0].nodelist[0].chars
-                local_references += re.split(r",\s*", r)
+                references += [
+                    Reference(None, l)
+                    for l in re.split(r",\s*", r)
+                ]
         if isinstance(node, LatexEnvironmentNode):
             if node.environmentname in MAIN_ENVIRONMENTS:
                 last_label, environment_references = get_references(
@@ -151,12 +160,11 @@ def get_references(
                     nodes=node.nodelist,
                     label=last_label,
                 )
-            all_references += environment_references
-    all_references += [Reference(label, r) for r in set(local_references)]
-    for r in all_references:
+            references += environment_references
+    for r in references:
         if not r.from_:
             r.from_ = label
-    return label, all_references
+    return label, references
 
 
 @click.command()
@@ -187,9 +195,8 @@ def main(files: Tuple[Path]):
         all_references += references
 
     graph = graphviz.Digraph()
-    for r in all_references:
-        if r.from_:
-            graph.edge(r.from_.replace(":", "-"), r.to.replace(":", "-"))
+    for r in set(all_references):
+        r.add_edge_to_graph(graph)
 
     graph.render("graph.gv")
 
