@@ -118,8 +118,14 @@ class Reference:
         return hash(str(self.from_) + "\\" + self.to)
 
     def add_edge_to_graph(self, graph: graphviz.Digraph) -> None:
-        if self.from_:
-            graph.edge(self.from_.replace(":", "-"), self.to.replace(":", "-"))
+        """Adds this reference as an edge to a graph."""
+        if not self.from_:
+            return
+        a = str(hash(self.from_))
+        b = str(hash(self.to))
+        graph.node(a, self.from_)
+        graph.node(b, self.to)
+        graph.edge(a, b)
 
 
 def get_references(
@@ -147,8 +153,7 @@ def get_references(
             elif str(node.macroname).lower() in REFERENCE_MACROS:
                 r = node.nodeargd.argnlist[0].nodelist[0].chars
                 references += [
-                    Reference(None, l)
-                    for l in re.split(r",\s*", r)
+                    Reference(None, l) for l in re.split(r",\s*", r)
                 ]
         if isinstance(node, LatexEnvironmentNode):
             if node.environmentname in MAIN_ENVIRONMENTS:
