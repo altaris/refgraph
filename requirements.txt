@@ -1,0 +1,6 @@
+click
+graphviz
+matplotlib
+networkx
+pylatexenc
+rich

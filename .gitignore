@@ -1,3 +1,8 @@
+*.gv
+*.json
+*.pdf
+*.tex
+
 docs/
 out/
 test.py
