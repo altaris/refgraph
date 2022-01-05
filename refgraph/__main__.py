@@ -3,20 +3,21 @@ Entry point
 """
 __docformat__ = "google"
 
+import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
-import re
-import sys
 
+import click
+import graphviz
+import networkx as nx
 from pylatexenc.latexwalker import (
     LatexEnvironmentNode,
     LatexMacroNode,
     LatexNode,
     LatexWalker,
 )
-import click
-import graphviz
 
 try:
     # pylint: disable=redefined-builtin
@@ -114,20 +115,6 @@ class Reference:
     from_: Optional[str]
     to: str
 
-    def __hash__(self) -> int:
-        return hash(str(self.from_) + "\\" + self.to)
-
-    def add_edge_to_graph(self, graph: graphviz.Digraph) -> None:
-        """Adds this reference as an edge to a graph."""
-        if not self.from_:
-            return
-        a = str(hash(self.from_))
-        b = str(hash(self.to))
-        graph.node(a, self.from_)
-        graph.node(b, self.to)
-        graph.edge(a, b)
-
-
 def get_references(
     nodes: List[LatexNode],
     label: Optional[str] = None,
@@ -199,12 +186,23 @@ def main(files: Tuple[Path]):
         _, references = get_references(nodelist)
         all_references += references
 
-    graph = graphviz.Digraph()
-    graph.attr("node", shape="box")
-    for r in set(all_references):
-        r.add_edge_to_graph(graph)
+    graph = nx.DiGraph()
+    graph.add_edges_from([(r.from_, r.to) for r in all_references if r.from_])
+    # graph = nx.dfs_tree(graph)
+    render(graph)
 
-    graph.render("graph.gv")
+
+def render(graph: nx.Graph) -> None:
+    """Renders a networkx graph using graphviz."""
+    gv = graphviz.Digraph()
+    gv.attr("node", shape="box")
+    for a, b in graph.edges:
+        ha = str(hash(a))
+        hb = str(hash(b))
+        gv.node(ha, a)
+        gv.node(hb, b)
+        gv.edge(ha, hb)
+    gv.render("graph.gv")
 
 
 # pylint: disable=no-value-for-parameter
