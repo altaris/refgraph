@@ -1,5 +1,4 @@
-refgraph
-==========
+# refgraph
 
 ![Python 3](https://img.shields.io/badge/python-3-blue)
 ![License](https://img.shields.io/github/license/altaris/refgraph)
@@ -7,9 +6,22 @@ refgraph
 
 Reference graph for LaTeX projects
 
-# Contributing
+## Using the Github action
 
-## Dependencies
+```yml
+- uses: altaris/refgraph@v1
+  with:
+    directory: src
+    # This will glob src/**/*.tex
+- uses: actions/upload-artifact@v2
+  with:
+    name: pdf
+    path: graph.gv.pdf
+```
+
+## Contributing
+
+### Dependencies
 
 * `python3.8` or newer;
 * `requirements.txt` for runtime dependencies;
@@ -25,7 +37,7 @@ pip install -r requirements.txt
 pip install -r requirements.dev.txt
 ```
 
-## Documentation
+### Documentation
 
 Simply run
 ```sh
@@ -37,7 +49,7 @@ This will generate the HTML doc of the project, and the index file should be at
 make docs-browser
 ```
 
-## Code quality
+### Code quality
 
 Don't forget to run
 ```sh
