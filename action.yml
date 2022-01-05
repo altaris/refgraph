@@ -1,0 +1,15 @@
+name: Github action for LaTeX reference graph
+description: Github action to create reference graph for LaTeX documents
+author: Cédric HT
+intputs:
+  files:
+    description: Input LaTeX file(s)
+    required: true
+runs:
+  using: docker
+  image: action/Dockerfile
+  args:
+    - ${{ input.files }}
+branding:
+  color: black
+  icon: move
