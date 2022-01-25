@@ -185,7 +185,20 @@ def get_references(
         resolve_path=True,
     ),
 )
-def main(files: Tuple[Path]):
+@click.option(
+    "-o",
+    "--output-directory",
+    default=Path("."),
+    required=False,
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        path_type=Path,
+        resolve_path=True,
+        writable=True,
+    ),
+)
+def main(files: Tuple[Path], output_directory: Path):
     """Entrypoint."""
     if not files:
         print("ERROR: Must specify at least one source file.")
@@ -204,7 +217,7 @@ def main(files: Tuple[Path]):
     for r in set(all_references):
         r.add_edge_to_graph(graph)
 
-    graph.render("graph.gv")
+    graph.render(output_directory / "graph.gv")
 
 
 # pylint: disable=no-value-for-parameter
