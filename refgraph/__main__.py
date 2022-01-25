@@ -206,6 +206,7 @@ def main(files: Tuple[Path], output_directory: Path):
 
     all_references: List[Reference] = []
     for file_path in files:
+        print(f"Reading file {file_path}")
         with open(file_path, "r", encoding="utf-8") as f:
             walker = LatexWalker(f.read())
         nodelist, *_ = walker.get_latex_nodes(pos=0)
@@ -217,6 +218,7 @@ def main(files: Tuple[Path], output_directory: Path):
     for r in set(all_references):
         r.add_edge_to_graph(graph)
 
+    print(f"Rendering graph to {str(output_directory)}")
     graph.render(output_directory / "graph.gv")
 
 
